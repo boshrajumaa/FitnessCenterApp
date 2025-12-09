@@ -1,0 +1,77 @@
+﻿@model FitnessCenterApp.Models.AIPlanViewModel
+
+@{
+    ViewData["Title"] = "AI Antrenör";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-lg border-0 h-100">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h1 class="display-1 mb-0">🤖</h1>
+                    <h4 class="mt-2">Yapay Zeka Antrenör</h4>
+                    <p class="mb-0 text-white-50">Bilgilerinizi girin, size özel planı alın.</p>
+                </div>
+                <div class="card-body p-4 bg-light">
+                    <form asp-action="GeneratePlan" method="post">
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Height" class="form-control" placeholder="Boy" />
+                            <label asp-for="Height">📏 Boyunuz (cm)</label>
+                            <span asp-validation-for="Height" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Weight" class="form-control" placeholder="Kilo" />
+                            <label asp-for="Weight">⚖️ Kilonuz (kg)</label>
+                            <span asp-validation-for="Weight" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <select asp-for="Goal" class="form-select">
+                                <option value="Kilo Verme">🏃‍♂️ Kilo Vermek İstiyorum</option>
+                                <option value="Kas Kazanma">💪 Kas Kazanmak İstiyorum</option>
+                                <option value="Sağlıklı Yaşam">🧘 Sadece Sağlıklı Olmak</option>
+                            </select>
+                            <label asp-for="Goal">🎯 Hedefiniz</label>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow">
+                                ✨ Planı Oluştur
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            @if (!string.IsNullOrEmpty(Model?.AIResponse))
+            {
+                <div class="card shadow-lg border-success h-100 animate__animated animate__fadeIn">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">✅ Size Özel Hazırlanan Plan</h5>
+                    </div>
+                    <div class="card-body p-5">
+                        @Html.Raw(Model.AIResponse)
+                    </div>
+                    <div class="card-footer bg-white text-center border-0">
+                        <a href="/Appointments/Create" class="btn btn-outline-success rounded-pill">
+                            📅 Bu Plan İçin Randevu Al
+                        </a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="h-100 d-flex flex-column align-items-center justify-content-center text-muted border rounded bg-white p-5 text-center">
+                    <h1 class="display-4">📊</h1>
+                    <h3>Sonuçlar Burada Görünecek</h3>
+                    <p>Lütfen sol taraftan verilerinizi girip butona basın.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
