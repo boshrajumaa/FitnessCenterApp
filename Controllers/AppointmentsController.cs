@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using FitnessCenterApp.Data;
 using FitnessCenterApp.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FitnessCenterApp.Controllers
 {
+    [Authorize]
     public class AppointmentsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -49,6 +51,7 @@ namespace FitnessCenterApp.Controllers
         // GET: Appointments/Create
         public IActionResult Create()
         {
+            // Hizmetleri ve Eğitmenleri Dropdown (Seçim kutusu) için hazırlıyoruz
             ViewData["ServiceId"] = new SelectList(_context.Services, "Id", "Name");
             ViewData["TrainerId"] = new SelectList(_context.Trainers, "Id", "FullName");
             return View();
@@ -59,14 +62,61 @@ namespace FitnessCenterApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,AppointmentDate,IsConfirmed,MemberId,ServiceId,TrainerId")] Appointment appointment)
+        public async Task<IActionResult> Create([Bind("Id,AppointmentDate,MemberId,ServiceId,TrainerId")] Appointment appointment)
         {
+            // Kullanıcı giriş yapmış mı kontrolü (Güvenlik)
+            if (User.Identity.IsAuthenticated)
+            {
+                // Randevuyu oluşturan üyenin bilgisini otomatik alıyoruz
+                appointment.MemberId = User.Identity.Name;
+            }
+
+            // --- KURAL 1: EĞİTMENİN ÇALIŞMA SAATLERİ KONTROLÜ ---
+            // 1. Seçilen eğitmenin çalışma saatlerini öğrenmek için veritabanından çekiyoruz
+            var selectedTrainer = await _context.Trainers.FindAsync(appointment.TrainerId);
+
+            // 2. Saat Kontrolü
+            if (selectedTrainer != null)
+            {
+                // Eğer seçilen saat, eğitmenin başlama saatinden küçükse veya bitiş saatinden büyükse hata ver
+                if (appointment.AppointmentDate.Hour < selectedTrainer.WorkStartHour ||
+                    appointment.AppointmentDate.Hour >= selectedTrainer.WorkEndHour)
+                {
+                    // Bu hata mesajı, View tarafında (Create.cshtml) eklediğimiz 'span' alanında görünecektir
+                    ModelState.AddModelError("TrainerId",
+                        $"Seçilen eğitmen sadece {selectedTrainer.WorkStartHour}:00 - {selectedTrainer.WorkEndHour}:00 saatleri arasında çalışmaktadır.");
+                }
+            }
+
+            // --- KURAL 2: GEÇMİŞ TARİH KONTROLÜ ---
+            // Kullanıcı geçmişe dönük randevu alamaz
+            if (appointment.AppointmentDate < DateTime.Now)
+            {
+                ModelState.AddModelError("AppointmentDate", "Geçmiş bir tarihe randevu alamazsınız.");
+            }
+
+            // --- KURAL 3: ÇAKIŞMA KONTROLÜ (CONFLICT CHECK) ---
+            // Seçilen eğitmenin, o gün ve o saatte başka bir randevusu var mı?
+            bool isTrainerBusy = await _context.Appointments.AnyAsync(x =>
+                x.TrainerId == appointment.TrainerId &&
+                x.AppointmentDate.Date == appointment.AppointmentDate.Date && // Aynı gün
+                x.AppointmentDate.Hour == appointment.AppointmentDate.Hour);  // Aynı saat
+
+            if (isTrainerBusy)
+            {
+                ModelState.AddModelError("TrainerId", "Seçilen eğitmen bu saatte doludur. Lütfen başka bir saat seçiniz.");
+            }
+
+            // --- 4. VERİTABANINA KAYIT ---
             if (ModelState.IsValid)
             {
+                appointment.IsConfirmed = false; // Randevu onaysız olarak başlar
                 _context.Add(appointment);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
+            // Hata varsa listeleri tekrar doldur ve sayfayı göster
             ViewData["ServiceId"] = new SelectList(_context.Services, "Id", "Name", appointment.ServiceId);
             ViewData["TrainerId"] = new SelectList(_context.Trainers, "Id", "FullName", appointment.TrainerId);
             return View(appointment);

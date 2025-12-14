@@ -1,59 +1,86 @@
 ﻿@model IEnumerable<FitnessCenterApp.Models.Appointment>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Randevular";
 }
 
-<h1>Index</h1>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-6 fw-bold text-primary">📅 Randevu Listesi</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.AppointmentDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsConfirmed)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.MemberId)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Service)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Trainer)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.AppointmentDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsConfirmed)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MemberId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Service.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Trainer.FullName)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+        @if (!User.IsInRole("Admin"))
+        {
+            <a asp-action="Create" class="btn btn-primary btn-lg rounded-pill shadow-sm">
+                ➕ Randevu Al
+            </a>
+        }
+    </div>
+
+    <div class="card shadow-lg border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="py-3 ps-4">Tarih & Saat</th>
+                        <th>Hizmet</th>
+                        <th>Eğitmen</th>
+                        <th>Durum</th>
+                        <th class="text-end pe-4">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold">@item.AppointmentDate.ToString("dd MMMM yyyy")</div>
+                                <div class="text-muted small">@item.AppointmentDate.ToString("HH:mm")</div>
+                            </td>
+
+                            <td>
+                                <span class="badge bg-info text-dark rounded-pill">
+                                    🧘 @Html.DisplayFor(modelItem => item.Service.Name)
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="ms-2">
+                                        <p class="fw-bold mb-0">@Html.DisplayFor(modelItem => item.Trainer.FullName)</p>
+                                        <p class="text-muted small mb-0">@Html.DisplayFor(modelItem => item.Trainer.Specialization)</p>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                @if (item.IsConfirmed)
+                                {
+                                    <span class="badge bg-success">✅ Onaylandı</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">⏳ Bekliyor</span>
+                                }
+                            </td>
+
+                            <td class="text-end pe-4">
+                                <div class="btn-group">
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger btn-sm rounded-circle" title="İptal Et / Sil">
+                                        🗑️
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @if (!Model.Any())
+            {
+                <div class="text-center p-5">
+                    <h4 class="text-muted">📭 Henüz hiç randevu yok.</h4>
+                </div>
+            }
+        </div>
+    </div>
+</div>

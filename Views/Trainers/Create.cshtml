@@ -1,43 +1,71 @@
 ﻿@model FitnessCenterApp.Models.Trainer
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Yeni Eğitmen";
 }
 
-<h1>Create</h1>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
 
-<h4>Trainer</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="FullName" class="control-label"></label>
-                <input asp-for="FullName" class="form-control" />
-                <span asp-validation-for="FullName" class="text-danger"></span>
+            <div class="card shadow border-0">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">➕ Yeni Eğitmen Ekle</h4>
+                </div>
+
+                <div class="card-body bg-light">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="FullName" class="control-label fw-bold mb-1"></label>
+                            <input asp-for="FullName" class="form-control shadow-sm" placeholder="Örn: Ahmet Yılmaz" />
+                            <span asp-validation-for="FullName" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Specialization" class="control-label fw-bold mb-1"></label>
+                            <select asp-for="Specialization" class="form-select shadow-sm">
+                                <option value="">Bir alan seçin...</option>
+                                <option value="Fitness">Fitness</option>
+                                <option value="Yoga">Yoga</option>
+                                <option value="Pilates">Pilates</option>
+                                <option value="Vücut Geliştirme">Vücut Geliştirme</option>
+                            </select>
+                            <span asp-validation-for="Specialization" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label asp-for="ImageUrl" class="control-label fw-bold mb-1"></label>
+                            <input asp-for="ImageUrl" class="form-control shadow-sm" placeholder="Resim URL'si (Opsiyonel)" />
+                            <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 form-group mb-3">
+                                <label asp-for="WorkStartHour" class="control-label fw-bold"></label>
+                                <input asp-for="WorkStartHour" type="number" min="0" max="23" class="form-control shadow-sm" />
+                                <span asp-validation-for="WorkStartHour" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 form-group mb-3">
+                                <label asp-for="WorkEndHour" class="control-label fw-bold"></label>
+                                <input asp-for="WorkEndHour" type="number" min="0" max="23" class="form-control shadow-sm" />
+                                <span asp-validation-for="WorkEndHour" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg shadow">💾 Kaydet</button>
+                            <a asp-action="Index" class="btn btn-secondary">↩️ Listeye Dön</a>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Specialization" class="control-label"></label>
-                <input asp-for="Specialization" class="form-control" />
-                <span asp-validation-for="Specialization" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ImageUrl" class="control-label"></label>
-                <input asp-for="ImageUrl" class="form-control" />
-                <span asp-validation-for="ImageUrl" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

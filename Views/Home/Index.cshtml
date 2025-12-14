@@ -1,8 +1,225 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Ana Sayfa";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<style>
+    /* Hero Section Arka Planı */
+    .hero-section {
+        background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); 
+        position: relative;
+        overflow: hidden;
+        padding: 100px 0;
+    }
+
+  
+    .bg-shape {
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 800px;
+        height: 800px;
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        border-radius: 50%;
+        opacity: 0.1;
+        filter: blur(80px);
+        z-index: 0;
+        animation: floatShape 10s infinite alternate;
+    }
+
+    @@keyframes floatShape {
+        from {
+            transform: translate(0, 0);
+        }
+
+        to {
+            transform: translate(-50px, 50px);
+        }
+    }
+
+    
+    .hero-title {
+        font-size: 4rem;
+        font-weight: 800;
+        line-height: 1.1;
+        background: -webkit-linear-gradient(45deg, #1a1a2e, #593196);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.25rem;
+        color: #636e72;
+        font-weight: 400;
+        margin-bottom: 2.5rem;
+        max-width: 90%;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(89, 49, 150, 0.15);
+        }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        display: block;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: #636e72;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    
+    .hero-img-container {
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero-img {
+        max-width: 110%;
+        filter: drop-shadow(0 20px 40px rgba(0,0,0,0.15));
+        animation: floatImg 6s ease-in-out infinite;
+    }
+
+    @@keyframes floatImg {
+        0% {
+            transform: translateY(0px);
+        }
+
+        50% {
+            transform: translateY(-20px);
+        }
+
+        100% {
+            transform: translateY(0px);
+        }
+    }
+</style>
+
+<div class="hero-section">
+    <div class="bg-shape"></div>
+
+    <div class="container position-relative" style="z-index: 2;">
+        <div class="row align-items-center">
+
+            <div class="col-lg-6 animate__animated animate__fadeInLeft">
+                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-bold mb-3 border border-primary border-opacity-25">
+                    🚀 #1 Yapay Zeka Destekli Spor Salonu
+                </span>
+
+                <h1 class="hero-title">
+                    Sınırlarını <br>
+                    <span style="color: var(--primary-color);">Yeniden Tanımla.</span>
+                </h1>
+
+                <p class="hero-subtitle">
+                    Profesyonel eğitmenler, modern ekipmanlar ve size özel hazırlanan
+                    <strong>AI (Yapay Zeka)</strong> antrenman programları ile hedeflerinize hiç olmadığı kadar yakınsınız.
+                </p>
+
+                <div class="d-flex gap-3 flex-wrap">
+                    @if (!User.Identity.IsAuthenticated)
+                    {
+                        <a href="/Identity/Account/Register" class="btn btn-primary-custom btn-lg shadow-lg">
+                            Ücretsiz Kayıt Ol <i class="bi bi-arrow-right-short fs-4 align-middle"></i>
+                        </a>
+                        <a href="/Identity/Account/Login" class="btn btn-outline-custom btn-lg">
+                            Giriş Yap
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="/AI" class="btn btn-primary-custom btn-lg shadow-lg">
+                            🤖 AI Programı Oluştur
+                        </a>
+                        <a href="/Appointments/Create" class="btn btn-outline-custom btn-lg">
+                            📅 Randevu Al
+                        </a>
+                    }
+                </div>
+
+                <div class="row mt-5 g-3">
+                    <div class="col-4">
+                        <div class="stat-card">
+                            <span class="stat-number">50+</span>
+                            <span class="stat-label">Eğitmen</span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="stat-card">
+                            <span class="stat-number">1200+</span>
+                            <span class="stat-label">Mutlu Üye</span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="stat-card">
+                            <span class="stat-number">7/24</span>
+                            <span class="stat-label">Destek</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 text-center hero-img-container d-none d-lg-block animate__animated animate__fadeInRight animate__delay-1s">
+                <img src="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=2070&auto=format&fit=crop"
+                     alt="Fitness Training"
+                     class="hero-img img-fluid rounded-4 shadow-lg"
+                     style="max-height: 500px; object-fit: cover;">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container py-5 mt-5">
+    <div class="text-center mb-5 animate-up">
+        <h6 class="text-primary fw-bold text-uppercase ls-2">Hizmetlerimiz</h6>
+        <h2 class="fw-bold display-5">Neden Bizi Seçmelisiniz?</h2>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4 animate-up delay-100">
+            <div class="feature-card p-4 h-100 border-0 shadow-sm rounded-4 text-center hover-top">
+                <div class="icon-box mx-auto mb-4 bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 2rem;">
+                    <i class="bi bi-cpu"></i>
+                </div>
+                <h4 class="fw-bold mb-3">Yapay Zeka Analizi</h4>
+                <p class="text-muted">Vücut kitle indeksinizi ve hedeflerinizi analiz eden AI motorumuz ile size nokta atışı programlar.</p>
+            </div>
+        </div>
+
+        <div class="col-md-4 animate-up delay-200">
+            <div class="feature-card p-4 h-100 border-0 shadow-sm rounded-4 text-center hover-top">
+                <div class="icon-box mx-auto mb-4 bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 2rem;">
+                    <i class="bi bi-people"></i>
+                </div>
+                <h4 class="fw-bold mb-3">Uzman Kadro</h4>
+                <p class="text-muted">Her biri alanında sertifikalı, deneyimli ve motive edici antrenörlerle birebir çalışma imkanı.</p>
+            </div>
+        </div>
+
+        <div class="col-md-4 animate-up delay-300">
+            <div class="feature-card p-4 h-100 border-0 shadow-sm rounded-4 text-center hover-top">
+                <div class="icon-box mx-auto mb-4 bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 2rem;">
+                    <i class="bi bi-calendar-check"></i>
+                </div>
+                <h4 class="fw-bold mb-3">Esnek Randevu</h4>
+                <p class="text-muted">Dilediğiniz zaman, dilediğiniz eğitmenden online randevu alın. Zamanınızı siz yönetin.</p>
+            </div>
+        </div>
+    </div>
 </div>

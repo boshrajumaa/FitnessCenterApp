@@ -1,0 +1,44 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+<ul class="navbar-nav">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        // KULLANICI GİRİŞ YAPMIŞ DURUMDA (Oturum Açık)
+
+        // 1. Profil Yönetimi Butonu (Mavi ve Yuvarlak Tasarım)
+        <li class="nav-item">
+            <a class="btn btn-info btn-sm rounded-pill me-2 text-white fw-bold" asp-area="Identity" asp-page="/Account/Manage/Index" title="Profil Yönetimi">
+                👤 Merhaba, @User.Identity?.Name!
+            </a>
+        </li>
+
+        // 2. Çıkış Yap Butonu (Kırmızı ve Belirgin)
+        <li class="nav-item">
+            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                <button type="submit" class="btn btn-danger btn-sm rounded-pill fw-bold">
+                    🚪 Çıkış Yap
+                </button>
+            </form>
+        </li>
+    }
+    else
+    {
+        // KULLANICI MİSAFİR DURUMUNDA (Oturum Kapalı)
+
+        // 1. Kayıt Ol Butonu (Gri)
+        <li class="nav-item">
+            <a class="btn btn-secondary btn-sm rounded-pill me-2 fw-bold" asp-area="Identity" asp-page="/Account/Register">
+                📝 Kayıt Ol
+            </a>
+        </li>
+
+        // 2. Giriş Yap Butonu (Yeşil ve Dikkat Çekici)
+        <li class="nav-item">
+            <a class="btn btn-success btn-sm rounded-pill fw-bold" asp-area="Identity" asp-page="/Account/Login">
+                🔐 Giriş Yap
+            </a>
+        </li>
+    }
+</ul>

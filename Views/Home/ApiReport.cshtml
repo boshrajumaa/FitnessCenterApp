@@ -1,0 +1,141 @@
+﻿@{
+    ViewData["Title"] = "Canlı API Raporu";
+}
+
+<style>
+    .trainer-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    .trainer-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+    }
+    .avatar-circle {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-size: 32px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        margin: 0 auto 15px auto;
+        border: 4px solid #fff;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .status-dot {
+        height: 10px;
+        width: 10px;
+        background-color: #2ecc71;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+        box-shadow: 0 0 5px #2ecc71;
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold text-primary">📊 Canlı API Verisi</h1>
+        <p class="lead text-muted">Aşağıdaki veriler doğrudan <code>/api/fitness/trainers</code> adresinden çekilmektedir.</p>
+        
+        <div class="d-inline-flex align-items-center bg-white px-4 py-2 rounded-pill shadow-sm border">
+            <span class="status-dot"></span>
+            <span class="fw-bold text-success me-3">API Bağlantısı Aktif</span>
+            <button onclick="loadTrainers()" class="btn btn-primary btn-sm rounded-pill px-4">
+                🔄 Verileri Yenile
+            </button>
+        </div>
+    </div>
+
+    <div id="loadingSpinner" class="text-center my-5">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Yükleniyor...</span>
+        </div>
+        <p class="mt-2 text-muted">Veriler sunucudan alınıyor...</p>
+    </div>
+
+    <div class="row g-4" id="apiCardGrid">
+        </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        loadTrainers();
+    });
+
+    function loadTrainers() {
+        var gridContainer = document.getElementById("apiCardGrid");
+        var spinner = document.getElementById("loadingSpinner");
+        
+        // 1. Önce temizle ve spinner'ı göster
+        gridContainer.innerHTML = "";
+        spinner.style.display = "block";
+
+        // 2. API'den Veri Çek (Fetch)
+        fetch('/api/fitness/trainers')
+            .then(response => {
+                if (!response.ok) throw new Error("API Hatası!");
+                return response.json();
+            })
+            .then(data => {
+                // Spinner'ı gizle
+                spinner.style.display = "none";
+
+                // Veri yoksa mesaj göster
+                if (data.length === 0) {
+                    gridContainer.innerHTML = '<div class="col-12 text-center"><p class="text-muted">Kayıtlı eğitmen bulunamadı.</p></div>';
+                    return;
+                }
+
+                // 3. Kartları Oluştur
+                data.forEach(trainer => {
+                    // İsim baş harflerini al (Avatar için)
+                    var initials = trainer.fullName.split(" ").map((n)=>n[0]).join("").toUpperCase();
+                    
+                    var cardHtml = `
+                        <div class="col-md-6 col-lg-4 col-xl-3 animate__animated animate__fadeInUp">
+                            <div class="card h-100 border-0 shadow-sm trainer-card">
+                                <div class="card-body text-center p-4">
+                                    <div class="avatar-circle mb-3">${initials}</div>
+                                    
+                                    <h5 class="card-title fw-bold mb-1">${trainer.fullName}</h5>
+                                    <span class="badge bg-info text-dark rounded-pill mb-3 px-3">
+                                        ${trainer.specialization}
+                                    </span>
+                                    
+                                    <div class="bg-light rounded p-2 mt-2 border">
+                                        <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Çalışma Saatleri</small>
+                                        <div class="d-flex justify-content-center align-items-center mt-1">
+                                            <span class="fs-5">🕒</span>
+                                            <span class="fw-bold ms-2 text-dark">
+                                                ${trainer.workStartHour}:00 - ${trainer.workEndHour}:00
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-white border-0 text-center pb-4">
+                                    <small class="text-muted">ID: #${trainer.id}</small>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    gridContainer.innerHTML += cardHtml;
+                });
+            })
+            .catch(error => {
+                spinner.style.display = "none";
+                gridContainer.innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-danger text-center shadow-sm">
+                            ⚠️ Veri çekilemedi! Lütfen API'nin çalıştığından emin olun. <br>
+                            <small>${error}</small>
+                        </div>
+                    </div>`;
+            });
+    }
+</script>

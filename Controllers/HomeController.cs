@@ -12,7 +12,10 @@ namespace FitnessCenterApp.Controllers
         {
             _logger = logger;
         }
-
+        public IActionResult ApiReport()
+        {
+            return View();
+        }
         public IActionResult Index()
         {
             return View();
