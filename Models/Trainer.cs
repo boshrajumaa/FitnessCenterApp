@@ -8,7 +8,7 @@ namespace FitnessCenterApp.Models
         [Key]
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "Ad Soyad zorunludur.")]
+        [Required(ErrorMessage = "Lütfen ad soyad giriniz.")]
         [Display(Name = "Ad Soyad")]
         public string FullName { get; set; } // Antrenörün tam adı
 
