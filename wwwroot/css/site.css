@@ -1,9 +1,9 @@
-/* Google Fonts - Poppins */
+﻿/* Google Fonts - Poppins */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root {
     --primary-color: #593196; /* Mor Ana Renk */
-    --secondary-color: #764ba2; /* A�?k Mor */
+    --secondary-color: #764ba2; /* Aç?k Mor */
     --accent-color: #2ecc71; /* Ye?il (Aksiyon) */
     --dark-bg: #1a1a2e;
     --light-bg: #f8f9fa;
@@ -179,3 +179,10 @@ body {
     width: 100%;
     color: var(--text-light);
 }
+.btn {
+    transition: all 0.3s ease-in-out;
+}
+
+    .btn:hover {
+        transform: translateY(-2px); 
+    }
