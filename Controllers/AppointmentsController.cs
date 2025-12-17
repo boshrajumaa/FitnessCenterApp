@@ -62,6 +62,9 @@ namespace FitnessCenterApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        /// <summary>
+        /// Bu metod, üye tarafından yeni bir randevu oluşturulmasını sağlar.
+        /// </summary>
         public async Task<IActionResult> Create([Bind("Id,AppointmentDate,MemberId,ServiceId,TrainerId")] Appointment appointment)
         {
             // Kullanıcı giriş yapmış mı kontrolü (Güvenlik)
