@@ -18,9 +18,9 @@ namespace FitnessCenterApp.Controllers
         }
         public IActionResult Index()
         {
+            Console.WriteLine($"User visited Home Page at {DateTime.Now}"); 
             return View();
         }
-
         public IActionResult Privacy()
         {
             return View();
