@@ -1,9 +1,12 @@
-using Microsoft.EntityFrameworkCore;
 using FitnessCenterApp.Data;
+using FitnessCenterApp.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddScoped<StabilityAIService>();
+builder.Services.AddScoped<GeminiAIService>();
 // Servislerin konteynere eklenmesi
 builder.Services.AddControllersWithViews();
 

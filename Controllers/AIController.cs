@@ -1,66 +1,120 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using FitnessCenterApp.Models;
 using Microsoft.AspNetCore.Authorization;
+using FitnessCenterApp.Services;
 
 namespace FitnessCenterApp.Controllers
 {
-    [Authorize] // Sadece üyeler kullanabilsin
+    [Authorize]
     public class AIController : Controller
     {
-        // GET: Form sayfasını gösterir
-        public IActionResult Index()
+        private readonly StabilityAIService _stabilityService;
+        private readonly GeminiAIService _geminiService;
+
+        public AIController(StabilityAIService stabilityService, GeminiAIService geminiService)
         {
-            return View();
+            _stabilityService = stabilityService;
+            _geminiService = geminiService;
         }
 
-        // POST: Formu işler ve sonuç üretir
-        [HttpPost]
-        public IActionResult GeneratePlan(AIPlanViewModel model)
+        public IActionResult Index()
         {
+            return View(new AIPlanViewModel());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GeneratePlan(AIPlanViewModel model)
+        {
+            bool isInfoEmpty = model.Age == null && model.Height == null && model.Weight == null && string.IsNullOrEmpty(model.Gender) && string.IsNullOrEmpty(model.BodyType) && string.IsNullOrEmpty(model.Goal) && string.IsNullOrEmpty(model.UserMessage);
+            bool isImageEmpty = model.UserImage == null || model.UserImage.Length == 0;
+
+            if (isInfoEmpty && isImageEmpty)
+            {
+                ModelState.AddModelError("", "Lütfen en az bir bilgi girin veya bir fotoğraf yükleyin.");
+                return View("Index", model);
+            }
+
             if (!ModelState.IsValid)
             {
                 return View("Index", model);
             }
 
-            // --- YAPAY ZEKA SİMÜLASYONU (MOCK AI) ---
-            // Gerçek API anahtarı olmadan projenin çalışması için bu simülasyonu kullanıyoruz.
-            // OpenAI API entegrasyonu kodları aşağıda yorum satırı olarak verilmiştir.
+            string ageStr = model.Age.HasValue ? model.Age.Value.ToString() : "belirtilmemiş";
+            string heightStr = model.Height.HasValue ? model.Height.Value.ToString() + " cm" : "belirtilmemiş";
+            string weightStr = model.Weight.HasValue ? model.Weight.Value.ToString() + " kg" : "belirtilmemiş";
+            string genderStr = string.IsNullOrEmpty(model.Gender) ? "belirtilmemiş" : model.Gender;
+            string bodyTypeStr = string.IsNullOrEmpty(model.BodyType) ? "belirtilmemiş" : model.BodyType;
+            string goalStr = string.IsNullOrEmpty(model.Goal) ? "Genel Sağlık ve Fit Görünüm (Varsayılan)" : model.Goal;
 
-            string plan = "";
+            string photoContext = isImageEmpty ? "Kullanıcı fotoğraf yüklemedi." : "Kullanıcı bir vücut fotoğrafı yükledi, analizi buna göre yap.";
 
-            // Basit bir kural tabanlı yapay zeka mantığı
-            if (model.Goal == "Kilo Verme")
+            try
             {
-                plan = $@"
-                <h4>🏃‍♂️ Kilo Verme Programınız Hazır!</h4>
-                <p>Boyunuz ({model.Height} cm) ve kilonuz ({model.Weight} kg) analiz edildi.</p>
-                <ul>
-                    <li><strong>Sabah:</strong> 30 dk aç karnına tempolu yürüyüş.</li>
-                    <li><strong>Öğle:</strong> Protein ağırlıklı salata.</li>
-                    <li><strong>Akşam:</strong> Sebze yemeği ve yoğurt.</li>
-                    <li><strong>Egzersiz:</strong> Haftada 4 gün Kardiyo + HIIT antrenmanı.</li>
-                </ul>
-                <div class='alert alert-info'>💡 Tavsiye: Günde en az 2.5 litre su içmeyi unutmayın!</div>";
+                string prompt = $@"
+                    Sen profesyonel bir fitness koçusun. Aşağıdaki bilgilere sahip bir danışan için kişiye özel bir antrenman ve beslenme programı yaz.
+                    Bazı bilgiler 'belirtilmemiş' olabilir. Bu durumda genel ama etkili tavsiyeler ver.
+                    Fotoğraf yüklenmişse, görsel analize dayalı tahminlerde bulun (örneğin 'Fotoğrafınızdan anladığım kadarıyla...').
+
+                    Cevabını HTML formatında ver (sadece <p>, <ul>, <li>, <strong>, <h3>, <div class='alert alert-info'> etiketlerini kullan). 
+                    Başlıkları h3 ile, maddeleri ul ile yaz. Samimi ve motive edici bir dil kullan.
+
+                    Kullanıcı Bilgileri:
+                    - Yaş: {ageStr}
+                    - Cinsiyet: {genderStr}
+                    - Boy: {heightStr}
+                    - Kilo: {weightStr}
+                    - Vücut Tipi: {bodyTypeStr}
+                    - Hedef: {goalStr}
+                    - Özel Notu: {model.UserMessage ?? "Yok"}
+                    - Fotoğraf Durumu: {photoContext}
+
+                    Eğer boy ve kilo belirtilmişse BMI hesapla, belirtilmemişse bu kısmı atla.";
+
+                model.AIResponse = await _geminiService.GenerateTextPlan(prompt);
             }
-            else if (model.Goal == "Kas Kazanma")
+            catch (Exception ex)
             {
-                plan = $@"
-                <h4>💪 Kas Kazanma Programınız Hazır!</h4>
-                <p>Vücut kitle indeksinize göre güçlü bir antrenman planı:</p>
-                <ul>
-                    <li><strong>Beslenme:</strong> Günlük protein alımınızı artırın (Kilonuz x 2g).</li>
-                    <li><strong>Antrenman:</strong> Ağırlık antrenmanlarına odaklanın (Hypertrophy).</li>
-                    <li><strong>Dinlenme:</strong> Günde en az 7-8 saat uyku.</li>
-                </ul>
-                <div class='alert alert-success'>🔥 Hedef: Her antrenmanda ağırlıkları artırmaya çalışın!</div>";
-            }
-            else
-            {
-                plan = "<h4>🧘 Sağlıklı Yaşam Planı</h4><p>Dengeli beslenme ve düzenli yürüyüş önerilir.</p>";
+                model.AIResponse = "<div class='alert alert-warning'>Metin planı oluşturulurken bir hata oldu.</div>";
             }
 
-            // Sonucu modele ekle ve View'a gönder
-            model.AIResponse = plan;
+            try
+            {
+                if (!isImageEmpty)
+                {
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        await model.UserImage!.CopyToAsync(memoryStream);
+                        var imageBytes = memoryStream.ToArray();
+                        model.OriginalImageBase64 = Convert.ToBase64String(imageBytes);
+                    }
+
+                    string genderPrompt = string.IsNullOrEmpty(model.Gender) ? "person" : (model.Gender == "Kadın" ? "female" : "male");
+                    string agePrompt = model.Age.HasValue ? $"{model.Age} years old" : "adult";
+                    string bodyPrompt = "fit, healthy body";
+
+                    if (goalStr.Contains("Kilo Verme")) bodyPrompt = "slim, fit, athletic, toned abs, weight loss transformation";
+                    else if (goalStr.Contains("Kas Kazanma")) bodyPrompt = "hyper muscular, bodybuilder, huge biceps, six pack, strong";
+
+                    string fullPrompt = $"{bodyPrompt}, {genderPrompt}, {agePrompt}, realistic photo, 8k resolution, cinematic lighting";
+
+                    var generatedBase64 = await _stabilityService.GenerateEditedImageAsync(model.UserImage!, fullPrompt);
+
+                    if (!string.IsNullOrEmpty(generatedBase64))
+                    {
+                        model.GeneratedImageBase64 = generatedBase64;
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "Metin planı hazırlandı ancak AI Resim Servisi cevap vermedi.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Resim Hatası: " + ex.Message);
+                ModelState.AddModelError("", "Resim işlenirken bir hata oluştu, ancak planınız hazır.");
+            }
+
             return View("Index", model);
         }
     }

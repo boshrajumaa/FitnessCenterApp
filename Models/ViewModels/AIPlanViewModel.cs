@@ -2,24 +2,39 @@
 
 namespace FitnessCenterApp.Models
 {
-    // Kullanıcıdan AI (Yapay Zeka) için alınacak veriler
     public class AIPlanViewModel
     {
+        [Display(Name = "Yaşınız")]
+        [Range(10, 100, ErrorMessage = "Geçerli bir yaş giriniz.")]
+        public int? Age { get; set; }
+
         [Display(Name = "Boyunuz (cm)")]
-        [Required(ErrorMessage = "Lütfen boyunuzu giriniz.")]
-        [Range(100, 250, ErrorMessage = "Geçerli bir boy giriniz.")]
-        public int Height { get; set; }
+        [Range(100, 250)]
+        public int? Height { get; set; }
 
         [Display(Name = "Kilonuz (kg)")]
-        [Required(ErrorMessage = "Lütfen kilonuzu giriniz.")]
-        [Range(30, 200, ErrorMessage = "Geçerli bir kilo giriniz.")]
-        public int Weight { get; set; }
+        [Range(30, 200)]
+        public int? Weight { get; set; }
+
+        [Display(Name = "Cinsiyet")]
+        public string? Gender { get; set; }
+
+        [Display(Name = "Vücut Tipi")]
+        public string? BodyType { get; set; }
 
         [Display(Name = "Hedefiniz")]
-        [Required]
-        public string Goal { get; set; } // Kilo Verme, Kas Kazanma, vb.
+        public string? Goal { get; set; }
 
-        // AI'nın ürettiği cevap buraya gelecek
+        [Display(Name = "Eklemek İstediğiniz Mesaj (Opsiyonel)")]
+        public string? UserMessage { get; set; }
+
+
+        [Display(Name = "Vücut Fotoğrafınız (Opsiyonel)")]
+        public IFormFile? UserImage { get; set; }
+
+        public string? OriginalImageBase64 { get; set; }
+
+        public string? GeneratedImageBase64 { get; set; }
         public string? AIResponse { get; set; }
     }
 }
